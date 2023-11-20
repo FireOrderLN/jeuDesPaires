@@ -1,0 +1,250 @@
+#include <ncurses.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+
+//Partie FO DEBUT
+
+/*
+//code stable
+int main()
+{
+    initscr();
+    start_color(); // Initialiser les couleurs
+    init_pair(1, COLOR_GREEN, COLOR_BLACK); // Initialiser une paire de couleurs (1) avec du texte vert sur fond noir
+    keypad(stdscr, TRUE);
+    cbreak();
+    noecho();
+
+    int values[12];
+    int occurrences[6] = {0};
+
+    // Initialisation du générateur de nombres aléatoires
+    srand(time(NULL));
+
+    // Remplissage du tableau avec les valeurs de 0 à 5
+    for (int i = 0; i < 6; i++) {
+        values[i] = i;
+        values[i + 6] = i;
+    }
+
+    // Mélange des valeurs
+    for (int i = 11; i > 0; i--) {
+        int j = rand() % (i + 1);
+        int temp = values[i];
+        values[i] = values[j];
+        values[j] = temp;
+    }
+
+    int height = 7, width = 9;
+    int start_y = 2, start_x = 2;
+    int horizontal_spacing = width + 2;
+    int vertical_spacing = height + 2;
+
+    int player_x = 3; // Initial position of the player (boîte d'indice 9)
+    int player_y = 1;
+
+    while (1) {
+        // Afficher les boîtes avec la position du joueur mise à jour
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 6; j++) {
+                WINDOW *win = newwin(height, width, start_y + i * vertical_spacing, start_x + j * horizontal_spacing);
+                refresh();
+
+                int value = values[i * 6 + j];
+
+                box(win, 0, 0);
+
+            // Sélectionne la boîte actuelle si le joueur est sur cette boîte
+            if (j == player_x && i == player_y) {
+                wattron(win, COLOR_PAIR(1)); // Activer le mode de surbrillance
+            }
+
+            mvwprintw(win, 0, 0, " ------- ");
+            mvwprintw(win, 6, 0, " ------- ");
+
+            for (int k = 1; k <= 5; k++) {
+                mvwprintw(win, k, 0, "|       |");
+            }
+
+            if (j == player_x && i == player_y) {
+                wattroff(win, COLOR_PAIR(1)); // Désactiver le mode de surbrillance
+            }
+
+                // Affichage de la valeur au milieu de la boîte
+                mvwprintw(win, height / 2, (width - 1) / 2, "%d", value);
+
+                wrefresh(win);
+            }
+        }
+
+        int c = getch();
+        switch (c) {
+        case 'a':
+            if (player_x > 0) {
+                player_x--;
+            } else if (player_y == 0) { // Déplacement automatique vers la deuxième rangée
+                player_y = 1;
+                player_x = 5;
+            } else if (player_y == 1) { // Déplacement automatique vers la deuxième rangée
+                player_y = 0;
+                player_x = 5;
+            }
+            break;
+        case 'z':
+            if (player_x < 5) {
+                player_x++;
+            } else if (player_y == 0) { // Déplacement automatique vers la deuxième rangée
+                player_y = 1;
+                player_x = 0;
+            } else if (player_y == 1) { // Déplacement automatique vers la deuxième rangée
+                player_y = 0;
+                player_x = 0;
+            }
+            break;
+        case 'q':
+            endwin();
+            return 0;
+        }
+
+        clear();
+    }
+}*/
+
+//Partie FO FIN
+//code en cours de progression
+
+void delay(int seconds) {
+    sleep(seconds);
+}
+
+int main() {
+    initscr();
+    start_color();
+    init_pair(1, COLOR_GREEN, COLOR_BLACK);
+    keypad(stdscr, TRUE);
+    cbreak();
+    noecho();
+
+    int values[12];
+    int occurrences[12] = {0};  // Ajuster la taille pour correspondre au nombre de cartes
+
+    srand(time(NULL));
+
+    for (int i = 0; i < 6; i++) {
+        values[i] = i;
+        values[i + 6] = i;
+    }
+
+    for (int i = 11; i > 0; i--) {
+        int j = rand() % (i + 1);
+        int temp = values[i];
+        values[i] = values[j];
+        values[j] = temp;
+    }
+
+    int height = 7, width = 9;
+    int start_y = 2, start_x = 2;
+    int horizontal_spacing = width + 2;
+    int vertical_spacing = height + 2;
+
+    int player_x = 3;
+    int player_y = 1;
+
+    int selected_indices[2] = {-1, -1};  // Stocker les indices des cartes sélectionnées
+    int selected_values[2] = {-1, -1};   // Stocker les valeurs des cartes sélectionnées
+    int selected_count = 0;  // Nombre de cartes sélectionnées
+
+    while (1) {
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 6; j++) {
+                WINDOW *win = newwin(height, width, start_y + i * vertical_spacing, start_x + j * horizontal_spacing);
+                refresh();
+
+                int index = i * 6 + j;
+
+                box(win, 0, 0);
+
+                if (occurrences[index] == 1 || (j == player_x && i == player_y)) {
+                    wattron(win, COLOR_PAIR(1));
+                }
+
+                mvwprintw(win, 0, 0, " ------- ");
+                mvwprintw(win, 6, 0, " ------- ");
+
+                for (int k = 1; k <= 5; k++) {
+                    mvwprintw(win, k, 0, "|       |");
+                }
+
+                if (occurrences[index] == 1 || (j == player_x && i == player_y)) {
+                    wattroff(win, COLOR_PAIR(1));
+                }
+
+                if (occurrences[index] == 1) {
+                    mvwprintw(win, height / 2, (width - 1) / 2, "%d", values[index]);
+                }
+
+                wrefresh(win);
+            }
+        }
+
+        int c = getch();
+        switch (c) {
+        case 'a':
+            if (player_x > 0 && occurrences[player_y * 6 + player_x - 1] == 0) {
+                player_x--;
+            } else if (player_y == 0) {
+                player_y = 1;
+                player_x = 5;
+            } else if (player_y == 1) {
+                player_y = 0;
+                player_x = 5;
+            }
+            break;
+        case 'z':
+            if (player_x < 5 && occurrences[player_y * 6 + player_x + 1] == 0) {
+                player_x++;
+            } else if (player_y == 0) {
+                player_y = 1;
+                player_x = 0;
+            } else if (player_y == 1) {
+                player_y = 0;
+                player_x = 0;
+            }
+            break;
+        case 'e':
+        // Vérifier si la carte sélectionnée n'a pas encore été retournée et que le nombre maximal de cartes sélectionnées n'a pas été atteint
+        if (occurrences[player_y * 6 + player_x] == 0 && selected_count < 2) {
+
+            // Marquer la carte comme retournée
+            occurrences[player_y * 6 + player_x] = 1;
+
+            // Stocker l'index de la carte sélectionnée
+            selected_indices[selected_count] = player_y * 6 + player_x;
+
+            // Stocker la valeur de la carte sélectionnée
+            selected_values[selected_count] = values[selected_indices[selected_count]];
+
+            // Incrémenter le nombre de cartes sélectionnées
+            selected_count++;
+        }
+        if (selected_count == 2) {
+            if (selected_values[0] == selected_values[1]) {
+                selected_count = 0;
+            } else {
+                for (int i = 0; i < 2; i++) {
+                    occurrences[selected_indices[i]] = 0;
+                }
+                sleep(2); // Attendre 2 secondes
+            }
+            selected_count = 0;
+        }
+        break;
+        case 'q':
+            endwin();
+            return 0;
+        }
+
+        clear();
+    }
+}
